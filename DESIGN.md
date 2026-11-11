@@ -786,16 +786,14 @@ retrained policy gives similar, not identical, numbers.
 | Integration | Real SUMO on the toy intersection (well under a second per run) | "a vehicle that never entered is still counted in the delay" |
 | Protocol | Fairness rules as tests | same seed and different controllers give the same cohort |
 | Schema | Every export validates against the JSON Schema | — |
-| CI | GitHub Actions runs lint, tests and the smoke test on every push, on Linux, Windows and macOS | workflow file written in M0; **not yet run**, see the note below |
+| CI | GitHub Actions runs lint, tests and the smoke test on every push, on Linux, Windows and macOS | **[verified]** the first run passed on all three |
 
 M0 already has 24 tests. They cover finding the pinned SUMO, building the toy
 network, reproducibility, `libsumo`/`traci` agreement, Python controlling the
 signal, and the two fairness facts named in section 8. **[verified]** They pass
-on Linux with Python 3.11, 3.12 and 3.13.
-
-Note on CI: the workflow has not run yet, because it starts on the first push
-to GitHub. So nothing in M0 has been run on Windows or macOS so far. The first
-CI run is the check for that, and any failure there gets fixed before M1.
+on Linux (Python 3.11, 3.12 and 3.13) and, in the first CI run, on Windows and
+macOS (Python 3.12). In that run the smoke test printed the same vehicle
+counts and the same mean queues on all three operating systems.
 
 ---
 

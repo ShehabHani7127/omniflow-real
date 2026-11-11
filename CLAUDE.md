@@ -41,7 +41,7 @@ interviews and graduate school applications. Therefore:
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
-| M0 Design, environment, lint, tests | **Done. Waiting for the owner's approval of `DESIGN.md`.** | 24 tests pass on Linux (Python 3.11, 3.12, 3.13); smoke test passes. CI has never run yet |
+| M0 Design, environment, lint, tests | **Done. Waiting for the owner's approval of `DESIGN.md`.** | 24 tests and the smoke test pass. First CI run green on Linux (3.11, 3.12), Windows and macOS |
 | M1 Network from OpenStreetMap | Not started | Needs approval first. OSM hosts are blocked in the cloud session (see below) |
 | M2 Demand and calibration | Not started | Needs real counts from the owner; build on flagged placeholders first |
 | M3 Baselines and metrics | Not started | |
@@ -53,11 +53,11 @@ interviews and graduate school applications. Therefore:
 **Next action:** wait for the owner to approve `DESIGN.md` and answer the
 open decisions below. Then do M1 only.
 
-**Before M1, check the first CI run.** The workflow in
-`.github/workflows/ci.yml` (Linux, Windows, macOS) had never run when M0 was
-committed, so the code is untested on Windows and macOS, and the pinned
-`setup-uv` commit hash in the workflow is unconfirmed. Look at the run with
-the GitHub tools and fix any failure first.
+**CI:** `.github/workflows/ci.yml` runs lint, tests and the smoke test on
+every push (Linux, Windows, macOS). The first run passed on all four jobs, and
+the smoke test printed the same vehicle counts and mean queues on all three
+operating systems. Check the run with the GitHub tools after every push and
+keep it green.
 
 ### Open decisions (DESIGN.md section 13.1), not answered yet
 
@@ -206,3 +206,6 @@ Found by web search on 2026-11-11; the pages could not be opened directly.
   Use CO2 for comparisons between controllers only.
 - GitHub release downloads and the PyTorch CPU index are blocked in the cloud
   session, so a custom PyTorch index cannot be locked from here.
+- If `git push` is refused with "Claude doesn't have GitHub access", do not
+  retry. The owner has to reconnect GitHub or install the Claude GitHub App on
+  the repository. This happened on the first M0 push.

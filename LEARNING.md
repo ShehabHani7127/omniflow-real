@@ -24,7 +24,7 @@ DeLand traffic yet. Four things exist now:
    the same version of every tool on any computer, including the traffic
    simulator SUMO.
 3. **Quality gates.** A linter (`ruff`), 24 automated tests (`pytest`), and
-   a continuous integration workflow (GitHub will run both on every push).
+   a continuous integration workflow (GitHub runs both on every push).
 4. **A first working simulation.** One intersection with one traffic light,
    simulated by SUMO and controlled from Python.
 
@@ -96,10 +96,11 @@ fewer silly mistakes, and code reviews about ideas instead of commas.
 installs the project from the lockfile, and runs the linter and the tests. If
 a change breaks something, we know within minutes. The workflow
 (`.github/workflows/ci.yml`) covers Windows, macOS and Linux because SUMO
-ships a different program for each. One honest caveat: when this section was
-written, the workflow had not run yet, because it starts on the first push. So
-far everything has only been run on Linux. Until you see the first green check
-mark on GitHub, treat "works on Windows and macOS" as a hope, not a fact.
+ships a different program for each. Its first run passed on all three. Until
+then, "works on Windows and macOS" was only a hope, because everything had been
+written and run on Linux. That gap is exactly what CI closes. A nice detail
+from that first run: the smoke test printed the same vehicle counts and mean
+queues on all three systems, although each one runs a different build of SUMO.
 
 ### 3. Design decisions and why
 
