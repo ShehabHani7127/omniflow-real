@@ -1,0 +1,96 @@
+[project]
+name = "omniflow-real"
+version = "0.1.0"
+description = "AI traffic signal control for DeLand, FL: a SUMO digital twin + multi-agent reinforcement learning."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "ShehabHani7127" }]
+
+# Core dependencies: everything needed for milestones M0-M3 (network, demand,
+# baselines, metrics). The four SUMO packages are pinned to the SAME exact
+# version on purpose: simulation results depend on the simulator version, so
+# upgrading SUMO must be a deliberate, visible change.
+dependencies = [
+    "eclipse-sumo==1.28.0", # the simulator itself (sumo, netconvert, ... binaries + tools)
+    "sumolib==1.28.0",      # read SUMO network files from Python
+    "traci==1.28.0",        # control a running simulation from Python (socket; works with sumo-gui)
+    "libsumo==1.28.0",      # same API as traci but in-process: much faster, no GUI
+    "numpy>=2.3",
+    "pandas>=2.3",
+    "matplotlib>=3.10",
+    "scipy>=1.16",          # Student-t confidence intervals; routeSampler optimiser
+]
+
+[project.optional-dependencies]
+# Installed only when a milestone needs them, so the base install stays small.
+#   uv sync --extra rl        (M4, M5)
+#   uv sync --extra vision    (M6)
+rl = [
+    "sumo-rl==1.4.5",
+    "stable-baselines3==2.9.2",
+]
+vision = [
+    "ultralytics>=8.4,<9",  # YOLO detector + ByteTrack tracker. NOTE: AGPL-3.0 licensed.
+]
+
+[dependency-groups]
+# Developer tools. `uv sync` installs this group by default.
+dev = [
+    "pytest>=9.0",
+    "ruff>=0.17",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/omniflow"]
+
+# --------------------------------------------------------------------------
+# pytest
+# --------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+markers = [
+    "sumo: test starts a real SUMO simulation (a few seconds). Deselect with -m 'not sumo'.",
+]
+filterwarnings = ["error"]
+
+# --------------------------------------------------------------------------
+# ruff (linter + formatter)
+# --------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle: basic style errors and warnings
+    "F",       # pyflakes: unused imports, undefined names
+    "I",       # isort: sorted imports
+    "N",       # pep8-naming
+    "UP",      # pyupgrade: use modern Python syntax
+    "B",       # bugbear: likely bugs
+    "SIM",     # simplifications
+    "C4",      # cleaner comprehensions
+    "PTH",     # use pathlib instead of os.path
+    "RUF",     # ruff's own checks
+    "D",       # docstrings are required ...
+    "ANN",     # ... and so are type hints
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests are documented by their names; they do not need full docstrings.
+"tests/**" = ["D", "ANN"]
+
+[tool.ruff.format]
+docstring-code-format = true

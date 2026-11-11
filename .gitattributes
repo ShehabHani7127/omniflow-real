@@ -1,0 +1,14 @@
+# Use the same line endings on every operating system, so that files (and any
+# checksum computed from them) are byte-for-byte identical on Windows, macOS
+# and Linux.
+* text=auto eol=lf
+
+# Binary files: never convert line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.mp4 binary
+*.mov binary
+*.pt binary
+*.zip binary

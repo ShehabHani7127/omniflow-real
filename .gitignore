@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# OmniFlow Real
+# ---------------------------------------------------------------------------
+# Raw intersection videos: large, and they can show faces and licence plates.
+# They stay on your laptop. Only the aggregated counts are committed.
+data/videos/*
+!data/videos/.gitkeep
+
+# Raw simulator output and training logs: big, and fully regenerable by the
+# scripts. The small tables and figures in results/ ARE committed.
+results/raw/
