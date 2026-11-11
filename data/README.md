@@ -6,7 +6,7 @@ placeholder in the file itself.
 
 | Folder    | What goes here                                                        | In git? | Filled in |
 |-----------|-----------------------------------------------------------------------|---------|-----------|
-| `osm/`    | The OpenStreetMap extract of downtown DeLand (one frozen snapshot)     | yes     | M1        |
+| `osm/`    | The frozen OpenStreetMap snapshot of downtown DeLand, plus its provenance file (`.meta.json`: source, download time, fingerprint) | yes | M1 |
 | `counts/` | Traffic counts as CSV: FDOT counts and your own video counts           | yes     | M2, M6    |
 | `videos/` | Your intersection videos                                               | **no**  | M6        |
 

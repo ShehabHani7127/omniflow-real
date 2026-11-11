@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Default speed limits for downtown DeLand roads that have NO maxspeed tag in
+    OpenStreetMap.
+
+    Why this file exists: in the 2026-11-11 snapshot only the primary roads
+    (Woodland Blvd, New York Ave) carry a maxspeed tag. Every other street
+    would otherwise get SUMO's European-style defaults: 62 mph on secondary
+    roads (Amelia Ave) and 50 mph on tertiary roads. That is unrealistic
+    downtown.
+
+    The value: Florida Statutes section 316.183(2): "On all streets or
+    highways, the maximum speed limits for all vehicles must be 30 miles per
+    hour in business or residence districts". (Read on flsenate.gov, 2025
+    Florida Statutes, on 2026-11-11.) 30 mph = 13.41 m/s.
+
+    How it is used: netconvert loads SUMO's own osmNetconvert.typ.xml first and
+    this file second. A type defined again here only changes the attributes
+    given here (speed); lanes, priority and vehicle permissions stay at SUMO's
+    defaults. A road WITH a maxspeed tag always keeps its tagged limit.
+-->
+<types>
+    <type id="highway.primary"        speed="13.41"/>
+    <type id="highway.primary_link"   speed="13.41"/>
+    <type id="highway.secondary"      speed="13.41"/>
+    <type id="highway.secondary_link" speed="13.41"/>
+    <type id="highway.tertiary"       speed="13.41"/>
+    <type id="highway.tertiary_link"  speed="13.41"/>
+    <type id="highway.unclassified"   speed="13.41"/>
+    <type id="highway.residential"    speed="13.41"/>
+</types>

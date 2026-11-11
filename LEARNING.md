@@ -319,3 +319,260 @@ wrong if you pick your best model using the test seeds?**
   out the final exam as practice.
 
 </details>
+
+---
+
+## Milestone 1: a digital twin of downtown DeLand's streets
+
+### 1. What was built
+
+A road network of downtown DeLand that the SUMO simulator can drive cars on,
+built automatically from OpenStreetMap. One command builds everything:
+
+```bash
+uv run python scripts/m1_build_network.py
+```
+
+It produces:
+
+| File | What it is |
+|------|------------|
+| `data/osm/deland_downtown.osm.xml.gz` | The map data, downloaded once and frozen |
+| `data/osm/deland_downtown.osm.meta.json` | Where and when it came from, plus its fingerprint |
+| `network/deland.net.xml` | The SUMO road network |
+| `results/m1_network/network_map.png` | The map with every signal numbered |
+| `results/m1_network/signals.csv` | One row per signalized intersection |
+| `results/m1_network/summary.md` | Every number about the network, generated |
+| `results/m1_network/field_checklist.md` | What to check on a walk along Woodland |
+
+Read the code in pipeline order. Each file does one step:
+
+| File | Step |
+|------|------|
+| `src/omniflow/network/area.py` | Which rectangle of the map, and why |
+| `src/omniflow/network/osm.py` | Download, freeze, and clip the map data |
+| `src/omniflow/network/build.py` | Run `netconvert`, with a reason for every option |
+| `src/omniflow/network/inventory.py` | List the signals and their movements |
+| `src/omniflow/network/plot.py` | Draw the map |
+| `src/omniflow/network/report.py` | Write the summary and the checklist |
+
+### 2. Six ideas you should be able to explain
+
+**OpenStreetMap's data model.** OSM stores three things. A *node* is a point
+(latitude, longitude). A *way* is an ordered list of nodes: a street, a
+building outline. A *relation* groups other elements; a *turn restriction*
+is a relation that says "from this way, via this node, to that way: not
+allowed" (or "only allowed"). Everything carries *tags*, such as
+`highway=primary`, `maxspeed=30 mph`, `lanes=2` or
+`highway=traffic_signals`.
+
+**From a map to a simulator network.** A map is for humans. A simulator needs
+much more: lanes, which lane may turn where, who yields to whom, and a signal
+program for every traffic light. `netconvert` works all of this out from the
+tags, and fills gaps with defaults. That last part is where errors creep in,
+so this milestone mostly checks defaults.
+
+**Provenance and fingerprints.** The snapshot's `.meta.json` records the exact
+request, the download time and a SHA-256 *fingerprint* of the data. A
+fingerprint is a 64-character code computed from every byte; change one byte
+and the code changes completely. A test recomputes it, so nobody can swap the
+map data unnoticed, not even by accident.
+
+**Determinism.** Building twice from the same snapshot gives a
+*byte-identical* network file, on Windows, macOS and Linux. That makes `git
+diff` meaningful: if the network file changes, something real changed. A test
+and the CI workflow both check this.
+
+**Defaults are decisions.** When data is missing, software picks a value for
+you. Here, OSM had speed limits only on Woodland and New York Ave, and SUMO's
+defaults would have put Amelia Ave at 62 mph. A default you did not choose is
+still a decision in your model, so the project makes it explicitly, writes it
+in a file, and cites its source (Florida Statutes 316.183(2): 30 mph in
+business and residence districts).
+
+**Coordinates.** GPS positions are angles (latitude and longitude). SUMO
+needs metres, so `netconvert` projects the map onto a flat grid (UTM zone
+17). `sumolib` converts back to latitude and longitude with the `pyproj`
+library, which is why `pyproj` became a dependency.
+
+### 3. Design decisions and why
+
+| Decision | Why | What we gave up |
+|----------|-----|-----------------|
+| Freeze one OSM snapshot in git | OSM changes daily; a frozen copy makes every later result reproducible | Fixes made to OSM later do not reach us until we refresh on purpose (`--refresh-osm`) |
+| OSM API instead of Overpass | Overpass connections fail in this cloud session; the official API works and suits small areas | The API returns everything (buildings too), so the file is bigger than needed |
+| Clip the data to the box ourselves | netconvert's own cut keeps whole roads that only touch the box; the first network was 4.9 km x 6.1 km instead of 1.5 km x 2.7 km | Roads now end at their last map point inside the box, a few metres short of the edge |
+| Florida 30 mph default for untagged streets | SUMO's defaults are European highway speeds | If a street is really signed 25 mph, the field walk must find it |
+| U-turns only at dead ends | Two OSM "no U-turn" rules on Woodland cannot be imported; this rule covers them | Real legal U-turns at an intersection, if any, are missing |
+| Replace netconvert's header with a fixed one | It contains the build time and absolute paths (on Windows, your user name) | We must make sure our header is valid XML (see the bug below) |
+| Store the network uncompressed | Compressed bytes depend on the zlib build, which differs between operating systems | A 1.7 MB file instead of about 0.23 MB |
+| Number signals north to south, name them "Woodland Blvd & ..." | Stable, readable labels for the map, the checklist and later tables | The SUMO IDs (OSM node numbers) are still needed to talk to SUMO; both are in the CSV |
+| Compare automatically with FDOT's list | An outside source catches mapping errors; doing it in code means it is redone on every rebuild | The FDOT list itself is unverified (found by web search) |
+
+### 4. The hardest bug: a test that passed by luck
+
+The test "the same download gives a byte-identical file" failed:
+
+```
+At index 10 diff: b'a' != b'b'
+```
+
+The two files had the same data but different names, `a.osm.xml.gz` and
+`b.osm.xml.gz`. Byte 10 of a gzip file is where gzip stores the original file
+name. Python writes it there unless you pass `filename=""`.
+
+Why did the real network test pass? Because the rebuilt file was given the
+same name as the committed one. The test was correct only by luck: it would
+have broken the day someone renamed a file. The lesson is to **test the
+property you mean**. "Equal data gives equal files" must hold for any name,
+so the test should use different names on purpose.
+
+The same detective work found three more traps:
+
+- **`--` inside an XML comment is illegal.** The first fixed header listed
+  options like `--junctions.join`. SUMO then refused to load the network. The
+  load check caught it at once, which is exactly why the build ends with a
+  load check.
+- **A path that looks fine on Linux.** SUMO lives inside `.venv`, so its path
+  printed as `.venv/lib/python3.12/...`, which on Windows is `.venv/Lib/...`.
+  The header would have differed on your laptop. Now it prints `<SUMO_HOME>/...`.
+- **Line endings.** Python's `write_text` writes `\r\n` on Windows, and the
+  `csv` module writes `\r\n` everywhere. Every generated text file is now
+  written with `\n`, so a rerun on your laptop changes nothing.
+- **A computer-specific chart style.** This cloud computer has a system-wide
+  matplotlib configuration that switches the font. The map would have looked
+  different on your laptop. The plotting code now starts from matplotlib's own
+  defaults and a font that ships with matplotlib.
+
+### 5. The hardest tradeoff: how much to trust the map
+
+OSM is made by volunteers. For this area it is good: all nine signals that
+FDOT lists on Woodland Blvd are there, and OSM's turn restrictions at Woodland
+and New York Ave agree with an independent report. But the build summary
+still lists 49 warnings, and every one was read. What they mean:
+
+| Warning kind | Meaning | Matters? |
+|--------------|---------|----------|
+| Restriction relation ignored / no way found | A turn rule points at a road that is outside the box or is a driveway. Two "no U-turn" rules on Woodland are the exception; the U-turn decision above covers them | Checked one by one |
+| Discarding unknown compound / unusable type | Old railway tags on some roads | No |
+| PT line with no stops | Bus routes; buses are not simulated | No |
+| Sharp turn / roundabout replaced | The roundabout on Amelia Ave near campus, redrawn | No |
+| Cannot apply turn sign information | Turn-lane arrows in OSM that do not match the lane count, on two edges | Field check |
+
+The rule: **do not silence warnings, explain them.** A long list of ignored
+warnings is how real errors hide. The summary counts them by kind, and this
+table explains each kind.
+
+What the data cannot tell us goes on the field checklist, generated from the
+network so nothing is forgotten:
+
+- Woodland & New York: really no turns at all?
+- Minnesota Ave (#5) and Indiana Ave (#11): really only three approaches?
+- Woodland & Church St (#7): a signal in OSM but not in FDOT's list.
+- Downtown Woodland: one lane each way plus turn pockets?
+
+### 6. Try it yourself (about 30 minutes)
+
+1. Run `uv run python scripts/m1_build_network.py`. Then run `git status`.
+   The network and every text report must be unchanged: that is determinism.
+   Only `network_map.png` may show as changed on your laptop, because an
+   image can differ in tiny pixel details between operating systems. (The
+   plotting code already uses a font that ships with matplotlib, so the
+   computer's own fonts and settings do not matter.)
+2. Open the network: `uv run sumo-gui -n network/deland.net.xml`. Zoom into
+   Woodland & New York Ave and look at the arrows at the end of each lane:
+   they show the allowed movements. (I could not test the SUMO window in the
+   cloud session, which has no screen: tell me if anything looks wrong.)
+3. Open `network/deland.net.xml` in a text editor and read the header comment.
+   Find one `<tlLogic>` element: that is a signal program, with phases written
+   as strings of `G` (green), `y` (yellow) and `r` (red), one letter per
+   movement.
+4. In `network/config/florida_speed_defaults.typ.xml`, change one `13.41` to
+   `27.78` (62 mph). Rebuild, then run `git diff --stat`. Which files changed?
+   Look at the speed table in `results/m1_network/summary.md`. Undo with
+   `git checkout -- network results`.
+5. Print `results/m1_network/field_checklist.md` and take it on a walk from
+   Plymouth Ave to New York Ave.
+
+### 7. Five interview questions
+
+**Q1. How did you turn OpenStreetMap data into a simulation network, and how
+do you know the result is right?**
+
+<details>
+<summary>Notes for your answer</summary>
+
+- Download once through the OSM API, freeze it with a fingerprint, clip it to
+  the study box, convert with `netconvert` using options that each have a
+  written reason.
+- "Right" has several checks: SUMO loads it with no errors; every signal on
+  FDOT's list for Woodland is present; turn rules at the key intersection
+  match an independent source; every warning was read and explained.
+- What code cannot check goes to a field checklist. Corrections become
+  patch files with evidence, never hand edits.
+
+</details>
+
+**Q2. What does "reproducible" mean for this network, and how did you enforce
+it?**
+
+<details>
+<summary>Notes for your answer</summary>
+
+- Same input snapshot, byte-identical network, on Windows, macOS and Linux.
+- Things that broke it: a build timestamp and absolute paths in netconvert's
+  header; gzip storing a time and a file name; zlib differences between
+  systems; `\r\n` line endings.
+- Enforced by a test that rebuilds and compares, and by CI rerunning the
+  build on three operating systems with `git diff --exit-code`.
+
+</details>
+
+**Q3. Your simulator has default values for missing data. Give an example
+where a default would have been wrong, and how you handled it.**
+
+<details>
+<summary>Notes for your answer</summary>
+
+- OSM had speed limits only on two roads. SUMO's defaults would have given
+  62 mph on Amelia Ave downtown.
+- Faster roads change travel times, routes, and how much signals matter, so
+  every later result would be distorted.
+- Fix: an explicit 30 mph default in a small file, citing Florida Statutes
+  316.183(2); tagged roads keep their tagged value. The summary prints the
+  speed table so anyone can check it.
+
+</details>
+
+**Q4. Why did you clip the map data yourself instead of using netconvert's
+boundary option?**
+
+<details>
+<summary>Notes for your answer</summary>
+
+- The API returns every road that touches the box complete. Some streets run
+  far past the box without crossing another street, so they arrive as one long
+  piece.
+- netconvert's option keeps any road that is partly inside, so the network
+  came out about 4.9 km x 6.1 km instead of 1.5 km x 2.7 km.
+- Clipping keeps only points inside the box. It is tested on a hand-made map,
+  including a road that leaves the box and comes back.
+- Lesson: check what a tool's option actually does, here by measuring the
+  network size, before trusting its name.
+
+</details>
+
+**Q5. A tool printed 49 warnings. What did you do with them?**
+
+<details>
+<summary>Notes for your answer</summary>
+
+- Grouped them by kind (numbers and IDs removed), using the true totals
+  netconvert reports for repeated warnings.
+- Explained each kind. Most are harmless (railway tags, bus routes, roads
+  outside the box). Two "no U-turn" rules could not be imported, which led to
+  the U-turn decision.
+- Warnings went into the generated summary instead of being silenced, so a
+  new warning after a change stands out.
+
+</details>

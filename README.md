@@ -4,10 +4,10 @@ AI traffic signal control for downtown DeLand, Florida: a SUMO digital twin of
 the Woodland Blvd (US 17-92) corridor, with multi-agent reinforcement learning
 compared fairly against fixed-time and actuated signal control.
 
-> **Status: milestone M0 of 7 is complete (design, environment, tests).**
-> There are no traffic results yet. Nothing in this repository is a claim
-> about real traffic in DeLand so far. The results table, figures and exact
-> reproduction commands arrive with milestones M3 to M7.
+> **Status: milestones M0 and M1 are complete** (design and environment; the
+> road network). There are no traffic results yet. Nothing in this repository
+> is a claim about real traffic in DeLand so far. The results table, figures
+> and exact reproduction commands arrive with milestones M3 to M7.
 
 ## What this project will do
 
@@ -22,6 +22,32 @@ compared fairly against fixed-time and actuated signal control.
 
 The full plan, including how the comparison is kept fair and what can go
 wrong, is in [`DESIGN.md`](DESIGN.md).
+
+## The digital twin network (M1)
+
+![Map of the downtown DeLand SUMO network with its signalized intersections](results/m1_network/network_map.png)
+
+The network is built from a frozen OpenStreetMap snapshot (in `data/osm/`)
+by one script. Rebuilding it gives a byte-identical file:
+
+```bash
+uv run python scripts/m1_build_network.py
+```
+
+What the script produces, all in `results/m1_network/`:
+
+- `summary.md`: network size, speed limits, build warnings, every signal, and
+  the comparison with FDOT's list of signals on Woodland Blvd;
+- `signals.csv`: one row per signalized intersection;
+- `field_checklist.md`: a printable list for checking the network on the
+  street;
+- `network_map.png`: the map above.
+
+To explore the network in the SUMO window:
+
+```bash
+uv run sumo-gui -n network/deland.net.xml
+```
 
 ## Quickstart
 
@@ -72,7 +98,7 @@ Silicon (macOS 15 or newer). There is no package for Intel Macs.
 | # | Milestone | Status |
 |---|-----------|--------|
 | M0 | Design, environment, linting, tests, first simulation | done |
-| M1 | Digital twin network from OpenStreetMap | not started |
+| M1 | Digital twin network from OpenStreetMap | done |
 | M2 | Traffic demand and calibration against counts | not started |
 | M3 | Baselines (fixed-time, actuated) and metrics | not started |
 | M4 | Multi-agent reinforcement learning | not started |
@@ -87,7 +113,7 @@ DESIGN.md       the plan: architecture, metrics, experiment protocol, risks
 LEARNING.md     plain-language notes on what was built and why, per milestone
 CLAUDE.md       project memory for AI-assisted sessions (goal, decisions, status)
 data/           real-world inputs: map extract, traffic counts (videos are not committed)
-network/        generated SUMO input files
+network/        the SUMO road network and its build inputs
 results/        generated tables and figures
 scripts/        one entry point per milestone
 src/omniflow/   the Python package, one sub-package per pipeline stage
@@ -128,5 +154,6 @@ uv sync --extra vision
 - [Eclipse SUMO](https://eclipse.dev/sumo/), the traffic simulator: EPL-2.0.
 - The optional vision dependency `ultralytics` is AGPL-3.0. It is only
   installed with `--extra vision`.
-- Map data, from milestone M1 on: © OpenStreetMap contributors, Open Database
-  License.
+- Map data: © OpenStreetMap contributors, available under the
+  [Open Database License](https://opendatacommons.org/licenses/odbl/). See
+  <https://www.openstreetmap.org/copyright>.

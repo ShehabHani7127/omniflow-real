@@ -1,0 +1,18 @@
+{
+  "source_url": "https://api.openstreetmap.org/api/0.6/map?bbox=-81.3105,29.0215,-81.295,29.0455",
+  "bbox": {
+    "south": 29.0215,
+    "west": -81.3105,
+    "north": 29.0455,
+    "east": -81.295
+  },
+  "downloaded_at_utc": "2026-11-11T12:21:11Z",
+  "sha256_uncompressed": "6fef7135fb984f6cfc697736efaf67bf2f58554d7ab37c3ec866445ed0b5d08c",
+  "bytes_uncompressed": 6993156,
+  "nodes": 24107,
+  "ways": 3549,
+  "relations": 48,
+  "copyright": "OpenStreetMap and contributors",
+  "attribution": "http://www.openstreetmap.org/copyright",
+  "license": "http://opendatacommons.org/licenses/odbl/1-0/"
+}

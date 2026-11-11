@@ -51,3 +51,17 @@ jobs:
 
       - name: Run the M0 smoke test
         run: uv run python scripts/m0_smoke_test.py
+
+      - name: Rebuild the M1 network from the committed OpenStreetMap snapshot
+        run: uv run python scripts/m1_build_network.py
+
+      # The rebuild must reproduce every committed file exactly, on every
+      # operating system. (The map PNG is not compared: fonts differ by OS.)
+      - name: Check that the rebuild changed no committed file
+        run: >-
+          git diff --exit-code --
+          network
+          results/m1_network/signals.csv
+          results/m1_network/expected_signals.csv
+          results/m1_network/summary.md
+          results/m1_network/field_checklist.md

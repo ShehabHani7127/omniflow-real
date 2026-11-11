@@ -1,0 +1,20 @@
+signal_no,name,tls_id,streets,lat,lon,junctions,approaches,incoming_lanes,signal_links,straight,left,right,uturn,phases,green_phases,cycle_s
+1,Amelia Ave & Plymouth Ave,101096082,Amelia Ave / Plymouth Ave,29.042857,-81.299778,1,4,4,12,4,4,4,0,4,2,90.0
+2,Woodland Blvd & Plymouth Ave,101096075,Woodland Blvd / Plymouth Ave,29.042813,-81.303909,1,4,8,11,5,4,2,0,8,4,90.0
+3,Amelia Ave & Pennsylvania Ave,101140011,Amelia Ave / Pennsylvania Ave,29.039082,-81.299643,1,4,4,12,4,4,4,0,4,2,90.0
+4,Woodland Blvd & Pennsylvania Ave,101122241,Woodland Blvd / Pennsylvania Ave,29.039063,-81.303762,1,4,5,11,4,4,3,0,6,3,90.0
+5,Woodland Blvd & Minnesota Ave,101034158,Woodland Blvd / Minnesota Ave,29.035429,-81.303606,1,3,4,6,2,2,2,0,4,2,90.0
+6,Woodland Blvd & Wisconsin Ave,101137239,Woodland Blvd / Wisconsin Ave,29.031704,-81.303518,1,4,6,10,4,4,2,0,6,3,90.0
+7,Woodland Blvd & Church St,101069158,Woodland Blvd / Church St,29.030807,-81.303497,1,4,5,10,4,3,3,0,6,3,90.0
+8,Amelia Ave & Rich Ave,101036375,Amelia Ave / Rich Ave,29.029931,-81.299322,1,4,6,14,6,4,4,0,4,2,90.0
+9,Woodland Blvd & Rich Ave,101102198,Woodland Blvd / Rich Ave,29.029891,-81.303465,1,4,6,10,4,4,2,0,6,3,90.0
+10,Florida Ave & Rich Ave,101036377,Florida Ave / Rich Ave,29.02988,-81.305429,1,4,4,12,4,4,4,0,4,2,90.0
+11,Woodland Blvd & Indiana Ave,101046327,Woodland Blvd / Indiana Ave,29.028978,-81.303437,1,3,5,7,3,3,1,0,6,3,90.0
+12,New York Ave & Amelia Ave,101068587,New York Ave / Amelia Ave,29.028093,-81.299279,1,4,6,14,6,4,4,0,4,2,90.0
+13,New York Ave & Alabama Ave,101043270,New York Ave / Alabama Ave,29.028086,-81.301328,1,4,4,12,4,4,4,0,4,2,90.0
+14,Woodland Blvd & New York Ave,101068589,Woodland Blvd / New York Ave,29.028077,-81.303432,1,4,4,4,4,0,0,0,4,2,90.0
+15,New York Ave & Florida Ave,101074952,New York Ave / Florida Ave,29.02806,-81.305449,1,4,5,11,4,4,3,0,6,3,90.0
+16,New York Ave & Clara Ave,101063691,New York Ave / Clara Ave,29.028056,-81.30756,1,4,5,11,4,4,3,0,6,3,90.0
+17,Woodland Blvd & Howry Ave,101051410,Woodland Blvd / Howry Ave,29.026294,-81.303378,1,4,5,11,4,4,3,0,6,3,90.0
+18,Woodland Blvd & Voorhis Ave,101107319,Woodland Blvd / Voorhis Ave,29.024515,-81.303314,1,4,6,10,4,4,2,0,6,3,90.0
+19,Amelia Ave & Voorhis Ave,101136729,Amelia Ave / Voorhis Ave,29.024497,-81.299178,1,4,5,13,5,4,4,0,6,3,90.0
